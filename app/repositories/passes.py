@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from app.config.main import settings
 from dateutil.parser import parse
 
-from app.schemas.passes import PassCreate
+from app.schemas.passes import SPassCreate
 
 class PassesRepository(SQLAlchemyRepository):
     model = Passes
@@ -16,7 +16,7 @@ class PassesRepository(SQLAlchemyRepository):
         self.session = session
         
         
-    async def create_ujin_pass(self, pass_data: PassCreate, user: User) -> None:
+    async def create_ujin_pass(self, pass_data: SPassCreate, user: User) -> int:
         url = (
             "https://api-uae-test.ujin.tech/api/v1/scud/pass/create/"
             f"?token={settings.UJIN_TOKEN}"
@@ -48,6 +48,8 @@ class PassesRepository(SQLAlchemyRepository):
         async with AsyncClient() as client:
             response = await client.post(url, headers=headers, json=payload)
             print(f"Status Code pass create: {response.status_code}")
+            pass_number: int = response.json()["data"]["pass"]["pass_number"]
+            return pass_number
         
         
     

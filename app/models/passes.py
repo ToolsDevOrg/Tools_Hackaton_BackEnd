@@ -13,6 +13,7 @@ class Passes(Base):
     __tablename__ = "passes"
     
     id: Mapped[uuid.UUID] = mapped_column(UUID, default=uuid.uuid4, primary_key=True)
+    pass_number_ujin: Mapped[int] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=True), default=lambda: datetime.now(timezone.utc), server_default=func.now()
     )

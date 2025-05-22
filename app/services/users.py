@@ -4,7 +4,7 @@ from app.dependencies.unitofwork import UnitOfWork
 from app.dependencies.users import authenticate_user, create_access_token, create_refresh_token, get_password_hash
 from app.exceptions.users.exceptions import InvalidTokenExc, TokenExpiredExc, UserAlreadyExistsExc, UserNotFoundExc
 from app.models.users import RefreshSession, User
-from app.schemas.users import SUserCreate, SUserLogin, UserTokens
+from app.schemas.users import SUserCreate, SUserLogin, SUserTokens
 from fastapi import Request, Response
 from app.config.main import settings
 
@@ -98,7 +98,7 @@ class UsersService:
             return user
 
     
-    async def refresh_token(self, uow: UnitOfWork, response: Response, request: Request) -> UserTokens:
+    async def refresh_token(self, uow: UnitOfWork, response: Response, request: Request) -> SUserTokens:
         """Обновить access_token"""
         try:
             async with uow:
@@ -146,7 +146,7 @@ class UsersService:
                     httponly=True,
                 )
                 await uow.commit()
-                return UserTokens(access_token=access_token, refresh_token=refresh_token)
+                return SUserTokens(access_token=access_token, refresh_token=refresh_token)
 
         except InvalidTokenExc:
             raise InvalidTokenExc

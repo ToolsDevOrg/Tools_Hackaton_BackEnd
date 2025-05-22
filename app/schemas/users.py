@@ -25,6 +25,6 @@ class SUserLogin(BaseModel):
     password: str
 
 
-class UserTokens(BaseModel):
+class SUserTokens(BaseModel):
     access_token: str
     refresh_token: uuid.UUID

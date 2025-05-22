@@ -3,7 +3,7 @@ from app.dependencies.unitofwork import UOWDep
 from app.dependencies.users import get_current_user
 from app.models.users import User
 from app.schemas.exceptions import SuccessResponse
-from app.schemas.users import SUserCurrent, SUserCreate, SUserLogin, UserTokens
+from app.schemas.users import SUserCurrent, SUserCreate, SUserLogin, SUserTokens
 from app.services.users import UsersService
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -42,10 +42,9 @@ async def get_current_user(user: User = Depends(get_current_user)) -> SUserCurre
 @router.post(
     "/refresh",
     summary="Обновить access_token",
-    status_code=status.HTTP_200_OK,
-    response_model=UserTokens,
+    status_code=status.HTTP_200_OK
 )
-async def refresh_token(uow: UOWDep, response: Response, request: Request):
+async def refresh_token(uow: UOWDep, response: Response, request: Request) -> SUserTokens:
     """
     **Обновить access_token**
     """
@@ -56,10 +55,9 @@ async def refresh_token(uow: UOWDep, response: Response, request: Request):
 @router.post(
     "/logout",
     summary="Закончить сессию у пользователя",
-    status_code=status.HTTP_200_OK,
-    response_model=SuccessResponse,
+    status_code=status.HTTP_200_OK
 )
-async def logout(uow: UOWDep, response: Response, request: Request, user: User = Depends(get_current_user)):
+async def logout(uow: UOWDep, response: Response, request: Request, user: User = Depends(get_current_user)) -> SuccessResponse:
     """
     **Закончить сессию у пользователя**
     """

@@ -57,3 +57,9 @@ class SQLAlchemyRepository:
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
         return result.scalars().all()
+    
+    async def find_all_by_filter(self, **filter_by) -> list[model]:
+        """Найти все сущности, удовлетворяющие фильтру"""
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        return result.scalars().all()

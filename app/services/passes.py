@@ -1,14 +1,15 @@
 from app.abstractions.unitofwork import UnitOfWork
+from app.models.enums import PassTypeEnum
 from app.models.passes import Passes
 from app.models.users import User
-from app.schemas.passes import PassCreate
+from app.schemas.passes import SPassCreate
 
 
 class PassesService:
     
-    async def create_pass(self, uow: UnitOfWork, pass_data: PassCreate, user: User) -> Passes:
+    async def create_pass(self, uow: UnitOfWork, pass_data: SPassCreate, user: User) -> Passes:
         async with uow:
-            new_pass = await uow.passes.insert_by_data(
+            new_pass: Passes = await uow.passes.insert_by_data(
                 {
                     "title": pass_data.title,
                     "start_date": pass_data.start_date,
@@ -22,6 +23,17 @@ class PassesService:
                     "user_id": user.id
                 }
             )
-            await uow.passes.create_ujin_pass(pass_data=pass_data, user=user)
+            pass_number = await uow.passes.create_ujin_pass(pass_data=pass_data, user=user)
+            
+            await uow.passes.update_by_filter({"pass_number_ujin": int(pass_number)}, id=new_pass.id)
+            
             uow.session.expunge(new_pass)
+            await uow.commit()
             return new_pass
+        
+    async def get_by_filter(self, uow: UnitOfWork, filter_type: PassTypeEnum, user: User) -> list[Passes]:
+        async with uow:
+            passes = await uow.passes.find_all_by_filter(user_id=user.id, pass_type=filter_type.value.lower())
+            if passes:
+                uow.session.expunge_all()
+            return passes
