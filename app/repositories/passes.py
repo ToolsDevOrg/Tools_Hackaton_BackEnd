@@ -1,21 +1,22 @@
 from datetime import datetime
+
+from dateutil.parser import parse
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.config.main import settings
 from app.models.passes import Passes
 from app.models.users import User
 from app.repositories.base import SQLAlchemyRepository
-from sqlalchemy.ext.asyncio import AsyncSession
-from httpx import AsyncClient
-from app.config.main import settings
-from dateutil.parser import parse
-
 from app.schemas.passes import SPassCreate
+
 
 class PassesRepository(SQLAlchemyRepository):
     model = Passes
 
     def __init__(self, session: AsyncSession):
         self.session = session
-        
-        
+
     async def create_ujin_pass(self, pass_data: SPassCreate, user: User) -> int:
         url = (
             "https://api-uae-test.ujin.tech/api/v1/scud/pass/create/"
@@ -31,7 +32,7 @@ class PassesRepository(SQLAlchemyRepository):
                 "mysmartflatcook=qzjycwsvrxvwvihfvutpdkzajlacblidrvwyquzshcosjstuivzhmzobntlcgopcshylxmcljocycqnvfsyzchuzurhvjbjdhyxozwcvjacpigrwnvxjuhewfgaobfgklqkvhuazbzuyzvyrjrmkgcrqupilcaolbekvnqsevgflzolahtdzrhyxujvrawgmdkxnjndfihoizrafhejlhypzvszgfpsoikrgngaueokukmrhugcfegluhilkhbsm1"
             ),
         }
-        
+
         formatted_time = pass_data.work_time_from.strftime("%H:%M")
 
         payload = {
@@ -50,6 +51,3 @@ class PassesRepository(SQLAlchemyRepository):
             print(f"Status Code pass create: {response.status_code}")
             pass_number: int = response.json()["data"]["pass"]["pass_number"]
             return pass_number
-        
-        
-    

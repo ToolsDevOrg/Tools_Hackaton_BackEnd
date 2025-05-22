@@ -1,23 +1,26 @@
-from datetime import datetime, timedelta, timezone
 import string
+from datetime import datetime, timedelta, timezone
+
+from fastapi import Request, Response
+
+from app.config.main import settings
 from app.dependencies.unitofwork import UnitOfWork
 from app.dependencies.users import authenticate_user, create_access_token, create_refresh_token, get_password_hash
 from app.exceptions.users.exceptions import InvalidTokenExc, TokenExpiredExc, UserAlreadyExistsExc, UserNotFoundExc
 from app.models.users import RefreshSession, User
 from app.schemas.users import SUserCreate, SUserLogin, SUserTokens
-from fastapi import Request, Response
-from app.config.main import settings
+
 
 class UsersService:
-    
+
     async def register_user(self, uow: UnitOfWork, user_data: SUserCreate, response: Response) -> User:
         async with uow:
             find_user: User | None = await uow.users.find_one_or_none(email=user_data.email)
             if find_user:
                 raise UserAlreadyExistsExc
-            
+
             new_user: User = await uow.users.insert_by_data(user_data.model_dump())
-            
+
             access_token = create_access_token(user_id=new_user.id)
             refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
             refresh_token = create_refresh_token()
@@ -48,26 +51,23 @@ class UsersService:
             )
             hashed_password = get_password_hash(user_data.password)
 
-            await uow.users.update_by_filter(
-                {"password": hashed_password}, id=new_user.id
-            )
-                    
+            await uow.users.update_by_filter({"password": hashed_password}, id=new_user.id)
+
             await uow.commit()
             return new_user
-    
-        
+
     async def login(self, uow: UnitOfWork, user_data: SUserLogin, response: Response) -> User:
         async with uow:
             find_user: User | None = await uow.users.find_one_or_none(email=user_data.email)
             if not find_user:
                 raise UserNotFoundExc
-            
+
             user = await authenticate_user(uow, user_data.email, user_data.password)
-            
+
             access_token = create_access_token(user_id=user.id)
             refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
             refresh_token = create_refresh_token()
-            
+
             await uow.refresh_session.insert_by_data(
                 {
                     "refresh_token": refresh_token,
@@ -75,7 +75,7 @@ class UsersService:
                     "user_id": user.id,
                 }
             )
-            
+
             response.set_cookie(
                 "access_token",
                 access_token,
@@ -84,7 +84,7 @@ class UsersService:
                 secure=settings.COOKIE_SECURE,
                 httponly=True,
             )
-            
+
             response.set_cookie(
                 "refresh_token",
                 refresh_token,
@@ -93,11 +93,10 @@ class UsersService:
                 secure=settings.COOKIE_SECURE,
                 httponly=True,
             )
-            
+
             await uow.commit()
             return user
 
-    
     async def refresh_token(self, uow: UnitOfWork, response: Response, request: Request) -> SUserTokens:
         """Обновить access_token"""
         try:
@@ -152,8 +151,7 @@ class UsersService:
             raise InvalidTokenExc
         except TokenExpiredExc:
             raise TokenExpiredExc
-        
-        
+
     async def logout(self, uow: UnitOfWork, response: Response, request: Request) -> None:
         """Выйти из компании"""
         response.delete_cookie("access_token")

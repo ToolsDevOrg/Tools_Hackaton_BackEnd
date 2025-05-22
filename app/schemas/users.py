@@ -1,4 +1,5 @@
 import uuid
+
 from pydantic import BaseModel, EmailStr
 
 from app.models.enums import UserRoleEnum
@@ -19,6 +20,7 @@ class SUserCurrent(BaseModel):
     fio: str
     jk_name: str
     role: UserRoleEnum
+
 
 class SUserLogin(BaseModel):
     email: EmailStr

@@ -1,9 +1,11 @@
 import uuid
 
 from sqlalchemy import update
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.users import RefreshSession, User
 from app.repositories.base import SQLAlchemyRepository
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class UsersRepository(SQLAlchemyRepository):
     model = User

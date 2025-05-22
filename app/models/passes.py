@@ -1,17 +1,18 @@
-from sqlalchemy.orm import Mapped, mapped_column
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import TIMESTAMP, Date, Float, ForeignKey, UUID, Integer, String
+from datetime import date, datetime, timezone
+
+from sqlalchemy import TIMESTAMP, UUID, Date, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
-from datetime import date
 
 from app.config.database import Base
-from app.models.enums import PassStatusEnum, PassTypeEnum, pass_type_enum, pass_status_enum
+from app.models.enums import PassStatusEnum, PassTypeEnum, pass_status_enum, pass_type_enum
+
 
 class Passes(Base):
-    
+
     __tablename__ = "passes"
-    
+
     id: Mapped[uuid.UUID] = mapped_column(UUID, default=uuid.uuid4, primary_key=True)
     pass_number_ujin: Mapped[int] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -26,7 +27,6 @@ class Passes(Base):
     organizer: Mapped[str] = mapped_column(String(255))
     participants: Mapped[int] = mapped_column(Integer)
     pass_type: Mapped[PassTypeEnum] = mapped_column(pass_type_enum)
-    car_number: Mapped[str| None] = mapped_column(String, nullable=True)
+    car_number: Mapped[str | None] = mapped_column(String, nullable=True)
     status: Mapped[PassStatusEnum] = mapped_column(pass_status_enum, default=PassStatusEnum.UNCONFIRMED)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("users.id", ondelete="CASCADE"))
-    

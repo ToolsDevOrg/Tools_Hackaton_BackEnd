@@ -1,6 +1,8 @@
-from datetime import datetime, timedelta, timezone
 import uuid
+from datetime import datetime, timedelta, timezone
+
 from fastapi import Depends, Request
+from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import EmailStr
 
@@ -8,11 +10,17 @@ from app.abstractions.unitofwork import UnitOfWork
 from app.config.main import settings
 from app.dependencies.unitofwork import UOWDep
 from app.exceptions.base import BaseHTTPException
-from app.exceptions.users.exceptions import IncorrectEmailOrPasswordException, IncorrectTokenFormatExc, TokenExpiredExc, TokenNotFoundExc, UserIsNotPresentExc
+from app.exceptions.users.exceptions import (
+    IncorrectEmailOrPasswordException,
+    IncorrectTokenFormatExc,
+    TokenExpiredExc,
+    TokenNotFoundExc,
+    UserIsNotPresentExc,
+)
 from app.models.users import User
-from jose import ExpiredSignatureError, JWTError, jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 async def get_token(request: Request) -> str:
     try:
@@ -49,8 +57,8 @@ async def get_current_user(uow: UOWDep, token: str = Depends(get_token)) -> User
         raise IncorrectTokenFormatExc
     except UserIsNotPresentExc:
         raise UserIsNotPresentExc
-    
-    
+
+
 def create_access_token(user_id: uuid.UUID) -> str:
     to_encode = {
         "sub": str(user_id),

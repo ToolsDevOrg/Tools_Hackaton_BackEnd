@@ -1,9 +1,11 @@
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
-from app.config.main import settings
 from contextlib import asynccontextmanager
-from app.api.routers import all_routers
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from app.api.routers import all_routers
+from app.config.main import settings
 
 openapi_url = None
 redoc_url = None
@@ -11,17 +13,18 @@ redoc_url = None
 if settings.VISIBILITY_DOCUMENTATION is True:
     openapi_url = "/openapi.json"
     redoc_url = "/redoc"
-    
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-    
-    
+
+
 app = FastAPI(lifespan=lifespan, openapi_url=openapi_url, redoc_url=redoc_url, root_path="/api")
 
 for router in all_routers:
     app.include_router(router)
-    
+
 origins = [settings.WEB_APP_URL]
 
 app.add_middleware(
@@ -37,6 +40,7 @@ app.add_middleware(
         "Authorization",
     ],
 )
+
 
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):

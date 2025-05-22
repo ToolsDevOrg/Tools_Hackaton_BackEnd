@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Mapped, mapped_column
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String, UUID
+
+from sqlalchemy import TIMESTAMP, UUID, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
 from app.config.database import Base
