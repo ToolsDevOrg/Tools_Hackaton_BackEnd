@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from app.config.main import settings
 from contextlib import asynccontextmanager
 from app.api.routers import all_routers
@@ -16,7 +17,7 @@ async def lifespan(app: FastAPI):
     yield
     
     
-app = FastAPI(lifespan=lifespan, openapi_url=openapi_url, redoc_url=redoc_url)
+app = FastAPI(lifespan=lifespan, openapi_url=openapi_url, redoc_url=redoc_url, root_path="/api")
 
 for router in all_routers:
     app.include_router(router)
@@ -36,3 +37,11 @@ app.add_middleware(
         "Authorization",
     ],
 )
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    response = {
+        "statusCode": exc.status_code,
+        "message": exc.detail,
+    }
+    return JSONResponse(status_code=exc.status_code, content=response)
