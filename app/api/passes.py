@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends
 from app.dependencies.unitofwork import UOWDep
 from app.models.enums import PassTypeEnum
@@ -17,6 +18,12 @@ async def create_pass(uow: UOWDep, pass_data: SPassCreate, user: User = Depends(
     """
     new_pass = await PassesService().create_pass(uow, pass_data, user)
     return new_pass
+
+
+@router.get("/detail/{pass_id}", status_code=200, summary="Рассмотреть детально пропуск")
+async def get_pass_detail(uow: UOWDep, pass_id: uuid.UUID, user: User = Depends(get_current_user)) -> SPassCurrent:
+    my_pass = await PassesService().get_pass_detail(uow, pass_id, user)
+    return my_pass
 
 
 @router.get("/filer/{filter_type}", status_code=200, summary="Получить пропуска по фильтру")

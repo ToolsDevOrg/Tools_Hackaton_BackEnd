@@ -1,4 +1,6 @@
+import uuid
 from app.abstractions.unitofwork import UnitOfWork
+from app.exceptions.passes.exceptions import PassNotFoundExc
 from app.models.enums import PassTypeEnum
 from app.models.passes import Passes
 from app.models.users import User
@@ -37,3 +39,12 @@ class PassesService:
             if passes:
                 uow.session.expunge_all()
             return passes
+        
+        
+    async def get_pass_detail(self, uow: UnitOfWork, pass_id: uuid.UUID, user: User):
+        async with uow:
+            my_pass = await uow.passes.find_one_or_none(id=pass_id)
+            if not my_pass:
+                raise PassNotFoundExc
+            uow.session.expunge(my_pass)
+            return my_pass
