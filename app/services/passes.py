@@ -22,6 +22,7 @@ class PassesService:
                     "organizer": pass_data.organizer,
                     "participants": pass_data.participants,
                     "pass_type": pass_data.pass_type,
+                    "car_number": pass_data.car_number,
                     "user_id": user.id
                 }
             )

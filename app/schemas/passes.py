@@ -1,7 +1,8 @@
 import uuid
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from datetime import date, datetime, time
 
+from app.exceptions.passes.exceptions import RequiredCarNumberExc
 from app.models.enums import PassStatusEnum, PassTypeEnum
 
 class SPassCreate(BaseModel):
@@ -14,8 +15,20 @@ class SPassCreate(BaseModel):
     longitude: float
     participants: int
     active_from: date
+    car_number: str | None
     work_time_from: time
     pass_type: PassTypeEnum
+    
+    @model_validator(mode="before")
+    @classmethod
+    def check_car_number_for_car_type(cls, values: dict):
+        pass_type = values.get("pass_type")
+        car_number = values.get("car_number")
+        
+        if pass_type == PassTypeEnum.CAR and not car_number:
+            raise RequiredCarNumberExc
+        
+        return values
     
 class SPassCurrent(BaseModel):
     id: uuid.UUID
@@ -29,4 +42,5 @@ class SPassCurrent(BaseModel):
     latitude: float
     policy_area: str
     participants: int
+    car_number: str | None
     status: PassStatusEnum

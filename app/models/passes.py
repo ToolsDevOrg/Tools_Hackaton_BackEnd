@@ -26,6 +26,7 @@ class Passes(Base):
     organizer: Mapped[str] = mapped_column(String(255))
     participants: Mapped[int] = mapped_column(Integer)
     pass_type: Mapped[PassTypeEnum] = mapped_column(pass_type_enum)
+    car_number: Mapped[str| None] = mapped_column(String, nullable=True)
     status: Mapped[PassStatusEnum] = mapped_column(pass_status_enum, default=PassStatusEnum.UNCONFIRMED)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID, ForeignKey("users.id", ondelete="CASCADE"))
     
