@@ -95,7 +95,6 @@ async def webhook(request: Request):
             "version": body["version"]
         }
         return JSONResponse(status_code=200, content=response)
-    
     except ValueError:
         response_text = "Я не расслышала ФИО. Пожалуйста, повторите еще раз."
 
