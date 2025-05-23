@@ -1,7 +1,9 @@
+from datetime import datetime
 import uuid
 
 from app.abstractions.unitofwork import UnitOfWork
 from app.exceptions.passes.exceptions import PassNotFoundExc
+from app.exceptions.users.exceptions import UserNotFoundExc
 from app.models.enums import PassTypeEnum
 from app.models.passes import Passes
 from app.models.users import User
@@ -49,3 +51,34 @@ class PassesService:
                 raise PassNotFoundExc
             uow.session.expunge(my_pass)
             return my_pass
+        
+    async def create_pass_with_alice(self, uow: UnitOfWork, pass_data: str) -> None:
+        async with uow:
+            formatted_data = pass_data.title()
+            find_user: User | None = await uow.users.find_one_or_none(fio=formatted_data)
+            if not find_user:
+                raise UserNotFoundExc
+            
+            new_pass: Passes = await uow.passes.insert_by_data(
+                {
+                    "title": "title",
+                    "start_date": datetime.strptime("2025-05-23", "%Y-%m-%d").date(),
+                    "location": "location",
+                    "latitude": 0,
+                    "longitude": 0,
+                    "policy_area": "policy_area",
+                    "organizer": "organizer",
+                    "participants": 100,
+                    "pass_type": "event",
+                    "car_number": None,
+                    "user_id": find_user.id,
+                }
+            )
+            # pass_number = await uow.passes.create_ujin_pass_with_alice(pass_data=pass_data)
+
+            # await uow.passes.update_by_filter({"pass_number_ujin": int(pass_number)}, id=new_pass.id)
+            
+            uow.session.expunge(new_pass)
+            await uow.commit()
+            
+                
