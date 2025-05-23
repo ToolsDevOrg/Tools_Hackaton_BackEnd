@@ -86,6 +86,16 @@ async def webhook(request: Request):
         await PassesService().create_pass_with_alice(uow, fio)
 
         response_text = f"Заявка на {fio} успешно создана!"
+        response = {
+            "response": {
+                "text": response_text,
+                "end_session": True
+            },
+            "session": body["session"],
+            "version": body["version"]
+        }
+        return JSONResponse(status_code=200, content=response)
+    
     except ValueError:
         response_text = "Я не расслышала ФИО. Пожалуйста, повторите еще раз."
 
@@ -99,7 +109,7 @@ async def webhook(request: Request):
         }
     except Exception as e:
         print("Ошибка при обработке запроса:", e)
-        response_text = "Произошла ошибка, я выключаюсь"
+        response_text = "Пользователь не найден или ошибка в ФИО"
 
     response = {
         "response": {
